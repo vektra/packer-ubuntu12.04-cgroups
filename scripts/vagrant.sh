@@ -17,4 +17,6 @@ chown -R vagrant /home/vagrant/.ssh
 
 # Install NFS for Vagrant
 apt-get update
-apt-get install -y nfs-common
+apt-get install -y nfs-common curl
+
+curl -L https://www.opscode.com/chef/install.sh | bash

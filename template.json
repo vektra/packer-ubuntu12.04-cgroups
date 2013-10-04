@@ -13,7 +13,7 @@
             "source_ami": "ami-53b1ff3a",
             "instance_type": "m1.small",
             "ssh_username": "ubuntu",
-            "ami_name": "packer-docker {{timestamp}}"
+            "ami_name": "packer-ar {{timestamp}}"
         },
         {
             "type": "vmware",
@@ -108,25 +108,6 @@
 
                 "vmware": {
                     "execute_command": "/bin/true"
-                }
-            }
-        },
-        {
-            "type": "shell",
-            "scripts": [
-                "scripts/docker.sh"
-            ],
-            "override": {
-                "amazon-ebs": {
-                    "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E '{{ .Path }}'"
-                },
-
-                "virtualbox": {
-                    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
-                },
-
-                "vmware": {
-                    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
                 }
             }
         },
