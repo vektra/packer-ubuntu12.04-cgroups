@@ -1,141 +1,134 @@
 {
-    "variables": {
-        "aws_access_key": "",
-        "aws_secret_key": ""
+  "builders": [
+    {
+      "access_key": "{{user `aws_access_key`}}",
+      "ami_name": "packer-ar {{timestamp}}",
+      "instance_type": "m1.small",
+      "region": "us-east-1",
+      "secret_key": "{{user `aws_secret_key` }}",
+      "source_ami": "ami-53b1ff3a",
+      "ssh_username": "ubuntu",
+      "type": "amazon-ebs"
     },
-
-    "builders": [
-        {
-            "type": "amazon-ebs",
-            "access_key": "{{user `aws_access_key`}}",
-            "secret_key": "{{user `aws_secret_key` }}",
-            "region": "us-east-1",
-            "source_ami": "ami-53b1ff3a",
-            "instance_type": "m1.small",
-            "ssh_username": "ubuntu",
-            "ami_name": "packer-ar {{timestamp}}"
+    {
+      "boot_command": [
+        "<esc><esc><enter><wait>",
+        "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+        "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+        "hostname={{ .Name }} ",
+        "fb=false debconf/frontend=noninteractive ",
+        "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+        "initrd=/install/initrd.gz -- <enter>"
+      ],
+      "boot_wait": "5s",
+      "http_directory": "http",
+      "iso_checksum": "61d5e67c70d97b33c13537461a0b153b41304ef412bb0e9d813bb157068c3c65",
+      "iso_checksum_type": "sha256",
+      "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
+      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+      "ssh_password": "vagrant",
+      "ssh_username": "vagrant",
+      "ssh_wait_timeout": "20m",
+      "type": "vmware-iso"
+    },
+    {
+      "boot_command": [
+        "<esc><esc><enter><wait>",
+        "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+        "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+        "hostname={{ .Name }} ",
+        "fb=false debconf/frontend=noninteractive ",
+        "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+        "initrd=/install/initrd.gz -- <enter>"
+      ],
+      "boot_wait": "5s",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "guest_os_type": "Ubuntu_64",
+      "http_directory": "http",
+      "iso_checksum": "61d5e67c70d97b33c13537461a0b153b41304ef412bb0e9d813bb157068c3c65",
+      "iso_checksum_type": "sha256",
+      "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
+      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+      "ssh_password": "vagrant",
+      "ssh_username": "vagrant",
+      "ssh_wait_timeout": "20m",
+      "type": "virtualbox-iso",
+      "virtualbox_version_file": ".vbox_version"
+    }
+  ],
+  "post-processors": [
+    {
+      "keep_input_artifact": true,
+      "type": "vagrant"
+    }
+  ],
+  "provisioners": [
+    {
+      "override": {
+        "amazon-ebs": {
+          "execute_command": "/bin/true"
         },
-        {
-            "type": "vmware",
-            "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
-            "iso_checksum": "61d5e67c70d97b33c13537461a0b153b41304ef412bb0e9d813bb157068c3c65",
-            "iso_checksum_type": "sha256",
-            "boot_wait": "5s",
-            "boot_command": [
-                "<esc><esc><enter><wait>",
-                "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-                "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-                "hostname={{ .Name }} ",
-                "fb=false debconf/frontend=noninteractive ",
-                "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-                "initrd=/install/initrd.gz -- <enter>"
-            ],
-            "http_directory": "http",
-            "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
-            "ssh_wait_timeout": "20m",
-            "ssh_username": "vagrant",
-            "ssh_password": "vagrant"
+        "virtualbox-iso": {
+          "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
         },
-        {
-            "type": "virtualbox",
-            "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.3-server-amd64.iso",
-            "iso_checksum": "61d5e67c70d97b33c13537461a0b153b41304ef412bb0e9d813bb157068c3c65",
-            "iso_checksum_type": "sha256",
-            "boot_wait": "5s",
-            "boot_command": [
-                "<esc><esc><enter><wait>",
-                "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-                "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-                "hostname={{ .Name }} ",
-                "fb=false debconf/frontend=noninteractive ",
-                "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-                "initrd=/install/initrd.gz -- <enter>"
-            ],
-            "http_directory": "http",
-            "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
-            "ssh_wait_timeout": "20m",
-            "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
-            "virtualbox_version_file": ".vbox_version",
-            "ssh_username": "vagrant",
-            "ssh_password": "vagrant"
+        "vmware-iso": {
+          "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
         }
-    ],
-
-    "provisioners": [
-        {
-            "type": "shell",
-            "script": "scripts/vagrant.sh",
-            "override": {
-                "amazon-ebs": {
-                    "execute_command": "/bin/true"
-                },
-
-                "virtualbox": {
-                    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
-                },
-
-                "vmware": {
-                    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
-                }
-            }
+      },
+      "script": "scripts/vagrant.sh",
+      "type": "shell"
+    },
+    {
+      "override": {
+        "amazon-ebs": {
+          "execute_command": "/bin/true"
         },
-        {
-            "type": "shell",
-            "script": "scripts/virtualbox.sh",
-            "override": {
-                "amazon-ebs": {
-                    "execute_command": "/bin/true"
-                },
-                "virtualbox": {
-                    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
-                },
-                "vmware": {
-                    "execute_command": "/bin/true"
-                }
-            }
+        "virtualbox-iso": {
+          "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
         },
-        {
-            "type": "shell",
-            "script": "scripts/kernel.sh",
-            "override": {
-                "amazon-ebs": {
-                    "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E '{{ .Path }}'"
-                },
-
-                "virtualbox": {
-                    "execute_command": "/bin/true"
-                },
-
-                "vmware": {
-                    "execute_command": "/bin/true"
-                }
-            }
-        },
-        {
-            "type": "shell",
-            "scripts": [
-                "scripts/vm_cleanup.sh"
-            ],
-            "override": {
-                "amazon-ebs": {
-                    "execute_command": "/bin/true"
-                },
-
-                "virtualbox": {
-                    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
-                },
-
-                "vmware": {
-                    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
-                }
-            }
+        "vmware-iso": {
+          "execute_command": "/bin/true"
         }
-    ],
-
-    "post-processors": [
-        {
-            "type": "vagrant",
-            "keep_input_artifact": true
+      },
+      "script": "scripts/virtualbox.sh",
+      "type": "shell"
+    },
+    {
+      "override": {
+        "amazon-ebs": {
+          "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E '{{ .Path }}'"
+        },
+        "virtualbox-iso": {
+          "execute_command": "/bin/true"
+        },
+        "vmware-iso": {
+          "execute_command": "/bin/true"
         }
-    ]
+      },
+      "script": "scripts/kernel.sh",
+      "type": "shell"
+    },
+    {
+      "override": {
+        "amazon-ebs": {
+          "execute_command": "/bin/true"
+        },
+        "virtualbox-iso": {
+          "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        },
+        "vmware-iso": {
+          "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'"
+        }
+      },
+      "scripts": [
+        "scripts/vm_cleanup.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  }
 }
+
