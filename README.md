@@ -1,11 +1,9 @@
-# Packer Template for Docker Images
+# Packer Template for Ubuntu 12.04 and CGroups
 
 This repository contains a Packer template for building machine images
-that are Docker-ready on top of Ubuntu 12.04. This involves upgrading the
-kernel and installing Docker.
+that are have a modern 3.x kernel and thus have cgroups fully available.
 
-Currently this is only setup for Amazon, but it should be trivial to add
-more platforms to this.
+Contains providiors for virtualbox, vmware, and amazon.
 
 ## Usage
 
@@ -20,4 +18,8 @@ $ export AWS_SECRET_KEY="your aws secret key"
 $ packer build template.json
 ```
 
-At the end of that, you'll have an AMI ready to go for Docker.
+This will build them all, to just build virtualbox
+```
+$ packer build -only=virtualbox-iso template.json
+```
+
